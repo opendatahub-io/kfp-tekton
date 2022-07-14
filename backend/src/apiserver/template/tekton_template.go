@@ -299,7 +299,7 @@ func (t *Tekton) injectArchivalStep(workflow util.Workflow, artifactItemsJSON ma
 					// move all results to /tekton/home/tep-results to avoid result duplication in copy-artifacts step
 					// TODO: disable eof strip, since no results under /tekton/results after this step
 					moveResults := workflowapi.Step{
-						Image:   "busybox",
+						Image:   "quay.io/rmartine/busybox",
 						Name:    "move-all-results-to-tekton-home",
 						Command: []string{"sh", "-c"},
 						Args: []string{fmt.Sprintf("if [ -d /tekton/results ]; then mkdir -p %s; mv /tekton/results/* %s/ || true; fi\n",
@@ -331,8 +331,8 @@ func (t *Tekton) injectArchivalStep(workflow util.Workflow, artifactItemsJSON ma
 					t.getObjectFieldSelector("PIPELINERUN", "metadata.labels['tekton.dev/pipelineRun']"),
 					t.getObjectFieldSelector("PODNAME", "metadata.name"),
 					t.getObjectFieldSelector("NAMESPACE", "metadata.namespace"),
-					t.getSecretKeySelector("AWS_ACCESS_KEY_ID", "mlpipeline-minio-artifact", "accesskey"),
-					t.getSecretKeySelector("AWS_SECRET_ACCESS_KEY", "mlpipeline-minio-artifact", "secretkey"),
+					t.getEnvVar("AWS_ACCESS_KEY_ID", common.GetStringConfig(common.ObjectStoreAccessKey)),
+					t.getEnvVar("AWS_SECRET_ACCESS_KEY", common.GetStringConfig(common.ObjectStoreSecretKey)),
 					t.getEnvVar("ARCHIVE_LOGS", strconv.FormatBool(archiveLogs)),
 					t.getEnvVar("TRACK_ARTIFACTS", strconv.FormatBool(trackArtifacts)),
 					t.getEnvVar("STRIP_EOF", strconv.FormatBool(stripEOF)),
