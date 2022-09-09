@@ -16,22 +16,39 @@
 # limitations under the License.
 
 # 1. Build api server application
-FROM golang:1.17.6-stretch as builder
-RUN apt-get update && apt-get install -y cmake clang musl-dev openssl
+FROM registry.redhat.io/ubi8/go-toolset:1.17 as builder
+
+USER root
+
+# Needed musl-dev for github.com/mattn/go-sqlite3
+RUN dnf update -y && \
+    dnf install -y cmake clang openssl
+
 WORKDIR /go/src/github.com/kubeflow/pipelines
+
 COPY . .
+
+ENV GOPATH /go 
+
 RUN GO111MODULE=on go build -o /bin/apiserver backend/src/apiserver/*.go
+
 # Check licenses and comply with license terms.
 RUN ./hack/install-go-licenses.sh
 # First, make sure there's no forbidden license.
-RUN go-licenses check ./backend/src/apiserver
-RUN go-licenses csv ./backend/src/apiserver > /tmp/licenses.csv && \
+RUN /go/bin/go-licenses check ./backend/src/apiserver
+RUN /go/bin/go-licenses csv ./backend/src/apiserver > /tmp/licenses.csv && \
     diff /tmp/licenses.csv backend/third_party_licenses/apiserver.csv && \
-    go-licenses save ./backend/src/apiserver --save_path /tmp/NOTICES
+    /go/bin/go-licenses save ./backend/src/apiserver --save_path /tmp/NOTICES
 
 # 2. Compile preloaded pipeline samples
-FROM python:3.7 as compiler
-RUN apt-get update -y && apt-get install --no-install-recommends -y -q default-jdk python3-setuptools python3-dev jq
+FROM registry.redhat.io/rhel8/python-38:latest as compiler
+
+USER root
+
+RUN dnf update -y && \
+    dnf install -y  python3-setuptools jq
+
+
 RUN wget https://bootstrap.pypa.io/get-pip.py && python3 get-pip.py
 COPY sdk/python/requirements.txt .
 RUN python3 -m pip install -r requirements.txt --no-cache-dir
@@ -59,7 +76,7 @@ RUN set -e; \
 
 
 # 3. Start api web server
-FROM debian:stable
+FROM registry.redhat.io/ubi8/ubi-minimal:8.6
 
 ARG COMMIT_SHA=unknown
 ENV COMMIT_SHA=${COMMIT_SHA}
@@ -77,13 +94,18 @@ COPY --from=builder /tmp/NOTICES /third_party/NOTICES
 COPY --from=compiler /samples/ /samples/
 RUN chmod +x /bin/apiserver
 
+USER root
+
 # Adding CA certificate so API server can download pipeline through URL and wget is used for liveness/readiness probe command
-RUN apt-get update && apt-get install -y ca-certificates wget
+RUN microdnf update -y && \
+    microdnf install -y ca-certificates wget
 
 # Pin sample doc links to the commit that built the backend image
 # Commented out due to no commit sha for non-release build
 # RUN sed -E "s#/(blob|tree)/master/#/\1/${COMMIT_SHA}/#g" -i /config/sample_config.json && \
 #     sed -E "s/%252Fmaster/%252F${COMMIT_SHA}/#g" -i /config/sample_config.json
+
+USER 1001
 
 # Expose apiserver port
 EXPOSE 8888
