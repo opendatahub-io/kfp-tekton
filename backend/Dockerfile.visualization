@@ -18,10 +18,12 @@
 # and exporter.py files in the directory specified above.
 
 # This image should be in sync with image in backend/src/apiserver/visualization/update_requirements.sh.
-FROM tensorflow/tensorflow:2.5.1
+FROM registry.redhat.io/rhel8/python-38:latest
 
-RUN apt-get update \
-  && apt-get install -y wget curl tar openssl
+USER root
+
+RUN dnf update -y && \
+    dnf install -y wget curl tar openssl python38-Cython
 
 RUN curl https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz > /tmp/google-cloud-sdk.tar.gz
 RUN mkdir -p /usr/local/gcloud
@@ -36,5 +38,7 @@ COPY backend/src/apiserver/visualization/requirements.txt /src
 RUN python3 -m pip install --upgrade pip && python3 -m pip install -r requirements.txt --no-cache-dir
 
 COPY backend/src/apiserver/visualization /src
+
+USER 1001
 
 ENTRYPOINT [ "python3", "server.py" ]

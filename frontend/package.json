@@ -71,7 +71,7 @@
     "mock:api": "ts-node-dev -O '{\"module\": \"commonjs\"}' --project mock-backend/tsconfig.json -r tsconfig-paths/register mock-backend/mock-api-server.ts 3001",
     "mock:server": "node server/dist/server.js build",
     "mock:server:inspect": "node inspect server/dist/server.js build",
-    "postinstall": "cd ./server && npm ci && cd ../mock-backend && npm ci",
+    "postinstall": "cd ./server && npm ci --unsafe-perm=true --allow-root && cd ../mock-backend && npm ci --unsafe-perm=true --allow-root",
     "start:proxy": "./scripts/start-proxy.sh",
     "start:proxy-and-server": "./scripts/start-proxy-and-server.sh",
     "start:proxy-and-server-inspect": "./scripts/start-proxy-and-server.sh --inspect",
