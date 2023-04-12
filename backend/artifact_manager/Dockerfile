@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/python-38
+FROM registry.access.redhat.com/ubi8/python-39
 WORKDIR /opt/app-root/src
 COPY backend/artifact_manager/requirements.txt /opt/app-root/src
 COPY backend/artifact_manager/setup.cfg /opt/app-root/src
