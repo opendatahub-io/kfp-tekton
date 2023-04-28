@@ -3,7 +3,7 @@ kind: ServiceMonitor
 metadata:
   labels:
     application-crd-id: data-science-pipelines
-  name: ml-pipelines-metrics-monitor
+  name: ds-pipelines-metrics-monitor
 spec:
   endpoints:
     - path: /metrics

@@ -35,7 +35,8 @@ spec:
           livenessProbe:
             exec:
               command:
-                - pidof
+                - test
+                - -x
                 - controller
             initialDelaySeconds: 30
             periodSeconds: 5
@@ -43,7 +44,8 @@ spec:
           readinessProbe:
             exec:
               command:
-                - pidof
+                - test
+                - -x
                 - controller
             initialDelaySeconds: 3
             periodSeconds: 5

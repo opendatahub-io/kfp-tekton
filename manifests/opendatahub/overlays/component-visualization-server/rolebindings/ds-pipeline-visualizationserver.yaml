@@ -1,0 +1,11 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ds-pipeline-visualizationserver
+subjects:
+  - kind: ServiceAccount
+    name: ds-pipeline-visualizationserver
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ds-pipeline

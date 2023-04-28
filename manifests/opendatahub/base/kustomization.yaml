@@ -89,11 +89,11 @@ configurations:
 
 images:
   - name: persistenceagent
-    newName: quay.io/internaldatahub/persistenceagent
-    newTag: 1.1.0
+    newName: quay.io/modh/odh-ml-pipelines-persistenceagent-container
+    newTag: v1.18.0-8
   - name: scheduledworkflow
-    newName: quay.io/internaldatahub/scheduledworkflow
-    newTag: 1.1.0
+    newName: quay.io/modh/odh-ml-pipelines-scheduledworkflow-container
+    newTag: v1.18.0-8
   - name: api-server
-    newName: quay.io/internaldatahub/api-server
-    newTag: 1.1.0
+    newName: quay.io/modh/odh-ml-pipelines-api-server-container
+    newTag: v1.18.0-8

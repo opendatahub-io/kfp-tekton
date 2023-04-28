@@ -11,8 +11,8 @@ Data Science Pipelines is the Open Data Hub's pipeline solution for data scienti
 1. The cluster needs to be OpenShift 4.9 or higher
 2. The [oc client](https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/latest/openshift-client-linux.tar.gz) is installed and you are logged into this cluster.
 3. The following Operators must be installed on the cluster.  (See [How to Install an Operator](#installing-a-prerequisite-operator))
-    * The Open Data Hub operator (See official [documentation](https://opendatahub.io/docs/getting-started/quick-installation.html)). 
-    * OpenShift Pipelines 1.7.2 or higher
+   * The Open Data Hub operator (See official [documentation](https://opendatahub.io/docs/getting-started/quick-installation.html)).
+   * OpenShift Pipelines 1.7.2 or higher
 4. The default installation namespace for Data Science Pipelines is `odh-applications`. If it hasn't already, this namespace will need to be created (via `oc new-project odh-applications`). In case you wish to install in a custom location, create it and update the kfdef as documented below.
 
 #### Installing a Prerequisite Operator
@@ -29,7 +29,7 @@ The installation of Data Science Pipelines requires a few Operators to be instal
 ### Installation Steps
 
 1. Ensure that the prerequisites are met.
-2. Apply the kfdef at [kfctl_openshift_ds-pipelines.yaml](https://github.com/opendatahub-io/odh-manifests/blob/master/kfdef/kfctl_openshift_ds-pipelines.yaml) via `oc apply -n odh-applications -f kfctl_openshift_ds-pipelines.yaml`. 
+2. Apply the kfdef at [kfctl_openshift_ds-pipelines.yaml](https://github.com/opendatahub-io/odh-manifests/blob/master/kfdef/kfctl_openshift_ds-pipelines.yaml) via `oc apply -n odh-applications -f kfctl_openshift_ds-pipelines.yaml`.
 
 Note that you may need to update the `namespace` field under `metadata` in case you want to deploy in a namespace that isn't `odh-applications`.
 
@@ -38,15 +38,15 @@ Note that you may need to update the `namespace` field under `metadata` in case 
     ```bash
     $ oc get route -n <kdef_namespace> ds-pipeline-ui -o jsonpath='{.spec.host}'
     ```
-    The value of `<kfdef_namespace>` should match the namespace field of the kfdef that you applied.
-    You may need to append the protocol to the route (ie `https://`), but this can otherwise be pasted into a browser to access the UI
+  The value of `<kfdef_namespace>` should match the namespace field of the kfdef that you applied.
+  You may need to append the protocol to the route (ie `https://`), but this can otherwise be pasted into a browser to access the UI
 
 * Alternatively, you can access the route via the console. To do so:
 
-    1. Go to `<kfdef_namespace>`
-    2. Click on `Networking` in the sidebar on the left side.
-    3. Click on `Routes`. It will take you to a new page in the console.
-    4. Click the url under the `Location` column for the row item matching `ds-pipeline-ui`
+   1. Go to `<kfdef_namespace>`
+   2. Click on `Networking` in the sidebar on the left side.
+   3. Click on `Routes`. It will take you to a new page in the console.
+   4. Click the url under the `Location` column for the row item matching `ds-pipeline-ui`
 
 
 ## Directory Structure

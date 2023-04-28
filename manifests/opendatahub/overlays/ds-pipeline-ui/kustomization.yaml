@@ -33,5 +33,5 @@ generatorOptions:
 
 images:
   - name: frontend
-    newName: quay.io/internaldatahub/frontend
-    newTag: 1.1.0
+    newName: quay.io/opendatahub/odh-ml-pipelines-frontend-container
+    newTag: beta-ui

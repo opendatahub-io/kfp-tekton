@@ -18,14 +18,8 @@ resources:
   # Services
   - ./services/mysql.yaml
 
-  # CronJobs
-  - ./cronjobs/mariadb-backup.yaml
-
 generatorOptions:
   disableNameSuffixHash: true
-
-configurations:
-  - params.yaml
 
 images:
   - name: mysql

@@ -36,7 +36,8 @@ spec:
           livenessProbe:
             exec:
               command:
-                - pidof
+                - test
+                - -x
                 - persistence_agent
             initialDelaySeconds: 30
             periodSeconds: 5
@@ -44,7 +45,8 @@ spec:
           readinessProbe:
             exec:
               command:
-                - pidof
+                - test
+                - -x
                 - persistence_agent
             initialDelaySeconds: 3
             periodSeconds: 5
