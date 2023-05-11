@@ -1,0 +1,40 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+  - ../../base
+
+resources:
+  # Roles
+  - ./roles/kubeflow-pipelines-metadata-writer-role.yaml
+
+  # Rolebindings
+  - ./rolebindings/kubeflow-pipelines-metadata-writer-binding.yaml
+
+  # ServiceAccounts
+  - ./serviceaccounts/kubeflow-pipelines-metadata-writer.yaml
+  - ./serviceaccounts/metadata-grpc-server.yaml
+
+  # Deployments
+  - ./deployments/metadata-envoy-deployment.yaml
+  - ./deployments/metadata-grpc-deployment.yaml
+  - ./deployments/metadata-writer.yaml
+
+  # Services
+  - ./services/metadata-envoy-service.yaml
+  - ./services/metadata-grpc-service.yaml
+  
+generatorOptions:
+  disableNameSuffixHash: true
+
+images:
+  - name: metadata-envoy
+    newName: quay.io/opendatahub/ds-pipelines-metadata-envoy
+    newTag: 2.0.0
+  - name: metadata-grpc
+    newName: quay.io/opendatahub/ds-pipelines-metadata-grpc
+    newTag: 2.0.0
+  - name: metadata-writer
+    newName: quay.io/opendatahub/ds-pipelines-metadata-writer
+    newTag: 2.0.0
