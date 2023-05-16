@@ -172,7 +172,7 @@ def get_long_description() -> str:
 
 setup(
     name=NAME,
-    version=find_version("kfp_tekton", "__init__.py"),
+    version='1.3.1',
     description=DESCRIPTION,
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
