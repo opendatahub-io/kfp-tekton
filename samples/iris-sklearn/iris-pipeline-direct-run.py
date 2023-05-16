@@ -157,25 +157,25 @@ def evaluate_model(
 
 data_prep_op = kfp.components.create_component_from_func(
     data_prep,
-    base_image="image-registry.openshift-image-registry.svc:5000/openshift/python:latest",
+    base_image="registry.access.redhat.com/ubi8/python-38",
     packages_to_install=["pandas", "scikit-learn"],
 )
 
 train_model_op = kfp.components.create_component_from_func(
     train_model,
-    base_image="image-registry.openshift-image-registry.svc:5000/openshift/python:latest",
+    base_image="registry.access.redhat.com/ubi8/python-38",
     packages_to_install=["pandas", "scikit-learn"],
 )
 
 evaluate_model_op = kfp.components.create_component_from_func(
     evaluate_model,
-    base_image="image-registry.openshift-image-registry.svc:5000/openshift/python:latest",
+    base_image="registry.access.redhat.com/ubi8/python-38",
     packages_to_install=["pandas", "scikit-learn"],
 )
 
 validate_model_op = kfp.components.create_component_from_func(
     validate_model,
-    base_image="image-registry.openshift-image-registry.svc:5000/openshift/python:latest",
+    base_image="registry.access.redhat.com/ubi8/python-38",
     packages_to_install=["pandas", "scikit-learn"],
 )
 
