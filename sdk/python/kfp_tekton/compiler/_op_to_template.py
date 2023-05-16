@@ -34,7 +34,7 @@ RESOURCE_OP_IMAGE = ":".join(["aipipeline/kubectl-wrapper", "latest"])
 TEKTON_HOME_RESULT_PATH = "/tekton/home/tep-results/"
 
 # The image to use in basic bash steps such as copying results in multi-step.
-TEKTON_BASH_STEP_IMAGE = 'busybox'
+TEKTON_BASH_STEP_IMAGE = 'registry.access.redhat.com/ubi8/ubi-minimal'
 TEKTON_COPY_RESULTS_STEP_IMAGE = 'library/bash'
 GENERATE_COMPONENT_SPEC_ANNOTATIONS = True
 
@@ -42,7 +42,7 @@ GENERATE_COMPONENT_SPEC_ANNOTATIONS = True
 def _get_base_step(name: str):
     """Base image step for running bash commands.
 
-    Return a busybox base step for running bash commands.
+    Return a ubi8-minimal base step for running bash commands.
 
     Args:
         name {str}: step name
@@ -254,7 +254,7 @@ def _process_parameters(processed_op: BaseOp,
     small tasks because it's relatively lightweight and small compared to the ubuntu and
     bash images.
 
-    - image: busybox
+    - image: registry.access.redhat.com/ubi8/ubi-minimal
         name: copy-results
         script: |
             #!/bin/sh
