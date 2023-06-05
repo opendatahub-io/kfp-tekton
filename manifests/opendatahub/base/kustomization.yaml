@@ -15,12 +15,17 @@ resources:
   - ./deployments/ds-pipeline-scheduledworkflow.yaml
   - ./deployments/ds-pipeline.yaml
   - ./deployments/ds-pipeline-tekton-driver-controller.yaml
-  - ./deployments/kfp-exithandler-controller.yaml
-  - ./deployments/kfp-exithandler-webhook.yaml
-  - ./deployments/tekton-pipelineloop-controller.yaml
-  - ./deployments/tekton-pipelineloop-webhook.yaml
-  - ./deployments/kfptask-controller.yaml
-  - ./deployments/kfptask-webhook.yaml
+  - ./deployments/ds-pipeline-exithandler-controller.yaml
+  - ./deployments/ds-pipeline-exithandler-webhook.yaml
+  - ./deployments/ds-pipeline-pipelineloop-controller.yaml
+  - ./deployments/ds-pipeline-pipelineloop-webhook.yaml
+  - ./deployments/ds-pipeline-kfptask-controller.yaml
+  - ./deployments/ds-pipeline-kfptask-webhook.yaml
+  - ./deployments/ds-pipeline-metadata-envoy.yaml
+  - ./deployments/ds-pipeline-metadata-grpc.yaml
+  - ./deployments/ds-pipeline-metadata-writer.yaml
+  - ./deployments/ds-pipeline-cache-deployer.yaml
+  - ./deployments/ds-pipeline-cache.yaml
 
   # Rolebindings
   - ./rolebindings/ds-pipeline-scheduledworkflow-binding.yaml
@@ -30,29 +35,37 @@ resources:
   - ./rolebindings/kfp-exithandler-rolebinding.yaml
   - ./rolebindings/tekton-pipelineloop-rolebinding.yaml
   - ./rolebindings/kfptask-controller-rolebinding.yaml
+  - ./rolebindings/kubeflow-pipelines-metadata-writer-binding.yaml
+  - ./rolebindings/ds-pipeline-cache-deployer.yaml
+  - ./rolebindings/ds-pipeline-cache.yaml
 
   # Roles
-  - ./roles/ds-pipeline-scheduledworkflow-role.yaml
+  - ./roles/ds-pipeline-scheduledworkflow.yaml
   - ./roles/ds-pipeline.yaml
   - ./roles/pipeline-runner.yaml
-  - ./roles/ds-pipeline-tekton-driver-role.yaml
-  - ./roles/kfp-exithandler-role.yaml
-  - ./roles/tekton-pipelineloop-role.yaml
-  - ./roles/kfptask-role.yaml
+  - ./roles/ds-pipeline-tekton-driver.yaml
+  - ./roles/ds-pipeline-exithandler.yaml
+  - ./roles/ds-pipeline-pipelineloop.yaml
+  - ./roles/ds-pipeline-kfptask.yaml
+  - ./roles/ds-pipeline-metadata-writer.yaml
+  - ./roles/ds-pipeline-cache-deployer.yaml
+  - ./roles/ds-pipeline-cache.yaml
 
   # ClusterRoleBindings
-  - ./clusterrolebindings/ds-pipeline-persistenceagent-clusterrolebinding.yaml
-  - ./clusterrolebindings/ds-pipeline-tekton-driver-clusterrolebinding.yaml
-  - ./clusterrolebindings/kfp-exithandler-webhook-clusterrolebinding.yaml
-  - ./clusterrolebindings/tekton-pipelineloop-clusterrolebinding.yaml
-  - ./clusterrolebindings/kfptask-clusterrolebinding.yaml
+  - ./clusterrolebindings/ds-pipeline-persistenceagent.yaml
+  - ./clusterrolebindings/ds-pipeline-tekton-driver.yaml
+  - ./clusterrolebindings/ds-pipeline-exithandler-webhook.yaml
+  - ./clusterrolebindings/ds-pipeline-pipelineloop.yaml
+  - ./clusterrolebindings/ds-pipeline-kfptask.yaml
+  - ./clusterrolebindings/ds-pipeline-cache-deployer.yaml
 
   # ClusterRoles
-  - ./clusterroles/ds-pipeline-persistenceagent-clusterrole.yaml
-  - ./clusterroles/ds-pipeline-tekton-driver-clusterrole.yaml
-  - ./clusterroles/kfp-exithandler-controller-clusterrole.yaml
-  - ./clusterroles/tekton-pipelineloop-clusterrole.yaml
-  - ./clusterroles/kfptask-clusterrole.yaml
+  - ./clusterroles/ds-pipeline-persistenceagent.yaml
+  - ./clusterroles/ds-pipeline-tekton-driver.yaml
+  - ./clusterroles/ds-pipeline-exithandler-controller.yaml
+  - ./clusterroles/ds-pipeline-pipelineloop.yaml
+  - ./clusterroles/ds-pipeline-kfptask.yaml
+  - ./clusterroles/ds-pipeline-cache-deployer.yaml
 
   # ServiceAccounts
   - ./serviceaccounts/ds-pipeline-container-builder.yaml
@@ -60,10 +73,14 @@ resources:
   - ./serviceaccounts/ds-pipeline-scheduledworkflow.yaml
   - ./serviceaccounts/ds-pipeline.yaml
   - ./serviceaccounts/pipeline-runner.yaml
-  - ./serviceaccounts/ds-pipeline-tekton-driver-serviceaccount.yaml
-  - ./serviceaccounts/kfp-exithandler-serviceaccount.yaml
-  - ./serviceaccounts/tekton-pipelineloop-serviceaccount.yaml
-  - ./serviceaccounts/kfptask-serviceaccount.yaml
+  - ./serviceaccounts/ds-pipeline-tekton-driver.yaml
+  - ./serviceaccounts/ds-pipeline-exithandler.yaml
+  - ./serviceaccounts/ds-pipeline-pipelineloop.yaml
+  - ./serviceaccounts/ds-pipeline-kfptask.yaml
+  - ./serviceaccounts/ds-pipeline-metadata-writer.yaml
+  - ./serviceaccounts/ds-pipeline-metadata-grpc-server.yaml
+  - ./serviceaccounts/ds-pipeline-cache-deployer.yaml
+  - ./serviceaccounts/ds-pipeline-cache.yaml
 
   # ConfigMaps
   - ./configmaps/object-store-config.yaml
@@ -76,7 +93,10 @@ resources:
 
   # Services
   - ./services/ds-pipeline.yaml
-  - ./services/ds-pipeline-tekton-driver-service.yaml
+  - ./services/ds-pipeline-tekton-driver.yaml
+  - ./services/ds-pipeline-metadata-envoy.yaml
+  - ./services/ds-pipeline-metadata-grpc.yaml
+  - ./services/ds-pipeline-cache.yaml
 
   # Monitoring
   - ../prometheus
@@ -158,4 +178,13 @@ images:
     newTag: 2.0.0
   - name: kfptask-webhook
     newName: quay.io/opendatahub/ds-pipelines-tekton-kfptask-webhook
+    newTag: 2.0.0
+  - name: metadata-envoy
+    newName: quay.io/opendatahub/ds-pipelines-metadata-envoy
+    newTag: 2.0.0
+  - name: metadata-grpc
+    newName: quay.io/opendatahub/ds-pipelines-metadata-grpc
+    newTag: 2.0.0
+  - name: metadata-writer
+    newName: quay.io/opendatahub/ds-pipelines-metadata-writer
     newTag: 2.0.0
