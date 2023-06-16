@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kfp-driver
-  namespace: openshift-pipelines
   labels:
     app.kubernetes.io/name: kfp-driver
     app.kubernetes.io/component: ckfp-driver

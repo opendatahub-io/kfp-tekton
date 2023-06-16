@@ -11,4 +11,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: ds-pipeline-persistenceagent
-    namespace: $(namespace)
+    namespace: data-science-pipelines-v2
