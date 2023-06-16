@@ -9,7 +9,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: kfp-driver
-    namespace: openshift-pipelines
+    namespace: data-science-pipelines-v2
 roleRef:
   kind: Role
   name: kfp-driver
