@@ -8,6 +8,7 @@ resources:
 - ../../third-party/tekton-custom-task
 - ../../third-party/minio/base
 - ../../third-party/mysql/base
+# - ../../third-party/kfp-csi-s3
 
 # Identifier for application manager to apply ownerReference.
 # The ownerReference ensures the resources get garbage collected
@@ -15,14 +16,14 @@ resources:
 
 images:
 - name: gcr.io/ml-pipeline/api-server
-  newName: docker.io/aipipeline/apiserver-dev
-  newTag: 6b8723529
+  newName: quay.io/aipipeline/apiserver
+  newTag: 2.0.0
 - name: gcr.io/ml-pipeline/persistenceagent
-  newName: docker.io/aipipeline/persistenceagent-dev
-  newTag: 6b8723529
+  newName: quay.io/aipipeline/persistenceagent
+  newTag: 2.0.0
 - name: gcr.io/ml-pipeline/scheduledworkflow
-  newName: docker.io/aipipeline/swf-dev
-  newTag: 6b8723529
+  newName: quay.io/aipipeline/scheduledworkflow
+  newTag: 2.0.0
 
 labels:
 - includeSelectors: true

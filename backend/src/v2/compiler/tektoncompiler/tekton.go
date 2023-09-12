@@ -294,6 +294,7 @@ func (state *pipelinerunDFS) dfs(taskName, compRef string, task *pipelinespec.Pi
 	}
 	sort.Strings(keys)
 	// condition is in DAG level, detect condition existance here and the status is used in the container level
+	priorScope := state.visitor.ConditionScope()
 	state.visitor.SetConditionScope(task.GetTriggerPolicy().GetCondition() != "")
 	if task.GetIterator() != nil {
 		// handle iterator case here
@@ -333,7 +334,7 @@ func (state *pipelinerunDFS) dfs(taskName, compRef string, task *pipelinespec.Pi
 			return err
 		}
 	}
-	state.visitor.SetConditionScope(false)
+	state.visitor.SetConditionScope(priorScope)
 	if task.GetIterator() != nil {
 		// Covert the PipelineLoop.Spec.PipelineSpec as embedded task spec
 		state.visitor.EmbedLoopDAG(taskName, compRef, task, component, dag)
@@ -657,6 +658,8 @@ const (
 	paramNameCachedDecision   = "cached_decision"
 	paramNamePodSpecPatchPath = "pod_spec_patch_path"
 	paramNameExecutorInput    = "executor_input"
+	paramNameMLMDServerHost   = "mlmd_server_address"
+	paramNameMLMDServerPort   = "mlmd_server_port"
 	paramKubernetesConfig     = "kubernetes_config" // stores Kubernetes config
 
 	kindPipelineLoop   = "PipelineLoop"

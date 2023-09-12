@@ -58,6 +58,13 @@ func (c *pipelinerunCompiler) LoopDAG(taskName, compRef string, task *pipelinesp
 
 func (c *pipelinerunCompiler) EmbedLoopDAG(taskName, compRef string, task *pipelinespec.PipelineTaskSpec, componentSpec *pipelinespec.ComponentSpec, dagSpec *pipelinespec.DagSpec) (err error) {
 	loop := c.PopLoop()
+
+	// inject parallelism if it exists
+	parallel := task.GetIteratorPolicy().GetParallelismLimit()
+	if parallel > 0 {
+		loop.Spec.Parallelism = int(parallel)
+	}
+
 	raw, err := json.Marshal(loop.Spec)
 	if err != nil {
 		return fmt.Errorf("unable to Marshal pipelineSpec:%v", err)
@@ -81,6 +88,7 @@ func (c *pipelinerunCompiler) EmbedLoopDAG(taskName, compRef string, task *pipel
 				Raw: raw,
 			},
 		},
+		RunAfter: task.GetDependentTasks(),
 	}
 
 	c.addPipelineTask(&pipelinelooptask)
@@ -269,13 +277,23 @@ func (c *pipelinerunCompiler) dagDriverTask(
 				Name:  paramNameIterationIndex,
 				Value: pipelineapi.ParamValue{Type: "string", StringVal: inputs.getIterationIndex()},
 			},
+			// "--mlmd_server_address"
+			{
+				Name:  paramNameMLMDServerHost,
+				Value: pipelineapi.ParamValue{Type: "string", StringVal: GetMLMDHost()},
+			},
+			// "--mlmd_server_port"
+			{
+				Name:  paramNameMLMDServerPort,
+				Value: pipelineapi.ParamValue{Type: "string", StringVal: GetMLMDPort()},
+			},
 			// produce the following outputs:
 			// - execution-id
 			// - iteration-count
 			// - condition
 		},
 	}
-	if len(inputs.deps) > 0 && !(c.ExitHandlerScope() && inputs.parentDagID == compiler.RootComponentName) {
+	if len(inputs.deps) > 0 && !(c.ExitHandlerScope() && inputs.parentDagID == compiler.RootComponentName) && !inputs.loopDag {
 		t.RunAfter = inputs.deps
 	}
 
@@ -314,6 +332,16 @@ func (c *pipelinerunCompiler) dagPubDriverTask(
 			{
 				Name:  paramNameDagExecutionId,
 				Value: pipelineapi.ParamValue{Type: "string", StringVal: inputs.getParentDagID(c.ExitHandlerScope() || rootDagPub)},
+			},
+			// "--mlmd_server_address"
+			{
+				Name:  paramNameMLMDServerHost,
+				Value: pipelineapi.ParamValue{Type: "string", StringVal: GetMLMDHost()},
+			},
+			// "--mlmd_server_port"
+			{
+				Name:  paramNameMLMDServerPort,
+				Value: pipelineapi.ParamValue{Type: "string", StringVal: GetMLMDPort()},
 			},
 		},
 	}

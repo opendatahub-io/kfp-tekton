@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"time"
 
+	apiv2 "github.com/kubeflow/pipelines/backend/api/v2beta1/go_client"
+	"github.com/kubeflow/pipelines/backend/src/apiserver/common"
 	commonutil "github.com/kubeflow/pipelines/backend/src/common/util"
 	"github.com/kubeflow/pipelines/backend/src/crd/controller/scheduledworkflow/client"
 	"github.com/kubeflow/pipelines/backend/src/crd/controller/scheduledworkflow/util"
@@ -29,6 +31,7 @@ import (
 	swfinformers "github.com/kubeflow/pipelines/backend/src/crd/pkg/client/informers/externalversions"
 	wraperror "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"google.golang.org/grpc/metadata"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/runtime"
@@ -56,9 +59,10 @@ var (
 
 // Controller is the controller implementation for ScheduledWorkflow resources
 type Controller struct {
-	kubeClient     *client.KubeClient
-	swfClient      *client.ScheduledWorkflowClient
-	workflowClient *client.WorkflowClient
+	kubeClient       *client.KubeClient
+	swfClient        *client.ScheduledWorkflowClient
+	workflowClient   *client.WorkflowClient
+	runServiceclient apiv2.RunServiceClient
 
 	// workqueue is a rate limited work queue. This is used to queue work to be
 	// processed instead of performing it as soon as a change happens. This
@@ -81,6 +85,7 @@ func NewController(
 	workflowClientSet commonutil.ExecutionClient,
 	swfInformerFactory swfinformers.SharedInformerFactory,
 	executionInformer commonutil.ExecutionInformer,
+	runServiceClient apiv2.RunServiceClient,
 	time commonutil.TimeInterface,
 	location *time.Location) *Controller {
 
@@ -99,9 +104,10 @@ func NewController(
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: util.ControllerAgentName})
 
 	controller := &Controller{
-		kubeClient:     client.NewKubeClient(kubeClientSet, recorder),
-		swfClient:      client.NewScheduledWorkflowClient(swfClientSet, swfInformer),
-		workflowClient: client.NewWorkflowClient(workflowClientSet, executionInformer),
+		kubeClient:       client.NewKubeClient(kubeClientSet, recorder),
+		swfClient:        client.NewScheduledWorkflowClient(swfClientSet, swfInformer),
+		workflowClient:   client.NewWorkflowClient(workflowClientSet, executionInformer),
+		runServiceclient: runServiceClient,
 		workqueue: workqueue.NewNamedRateLimitingQueue(
 			workqueue.NewItemExponentialFailureRateLimiter(DefaultJobBackOff, MaxJobBackOff), swfregister.Kind),
 		time:     time,
@@ -495,12 +501,37 @@ func (c *Controller) submitNewWorkflowIfNotAlreadySubmitted(
 	}
 
 	// If the workflow is not found, we need to create it.
-	newWorkflow, err := swf.NewWorkflow(nextScheduledEpoch, nowEpoch)
-	createdWorkflow, err := c.workflowClient.Create(ctx, swf.Namespace, newWorkflow)
+
+	run := &apiv2.CreateRunRequest{
+		Run: &apiv2.Run{
+			ExperimentId: swf.Spec.ExperimentId,
+			DisplayName:  workflowName,
+			PipelineSource: &apiv2.Run_PipelineVersionReference{
+				PipelineVersionReference: &apiv2.PipelineVersionReference{
+					PipelineId:        swf.Spec.PipelineId,
+					PipelineVersionId: swf.Spec.PipelineVersionId,
+				},
+			},
+			ServiceAccount: swf.Spec.ServiceAccount,
+			RecurringRunId: string(swf.GetObjectMeta().GetUID()),
+		},
+	}
+
+	owner, err := c.kubeClient.GetNamespaceOwner(ctx, swf.Namespace)
 	if err != nil {
 		return false, "", err
 	}
-	return true, createdWorkflow.ExecutionName(), nil
+	if owner != "" {
+		ctx = metadata.AppendToOutgoingContext(ctx, common.GetKubeflowUserIDHeader(),
+			common.GetKubeflowUserIDPrefix()+owner)
+	}
+
+	newRun, err := c.runServiceclient.CreateRun(ctx, run)
+
+	if err != nil {
+		return false, "", err
+	}
+	return true, newRun.GetDisplayName(), nil
 }
 
 func (c *Controller) updateStatus(
