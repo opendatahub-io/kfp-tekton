@@ -16,6 +16,7 @@ package util
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"hash/fnv"
 	"math"
 	"sort"
@@ -152,10 +153,10 @@ func (s *ScheduledWorkflow) getWorkflowParametersAsMap() map[string]string {
 // the appropriate OwnerReferences on the resource so handleObject can discover
 // the Schedule resource that 'owns' it.
 func (s *ScheduledWorkflow) NewWorkflow(
-	nextScheduledEpoch int64, nowEpoch int64) (*commonutil.Workflow, error) {
+	nextScheduledEpoch int64, nowEpoch int64, workflowName string) (*commonutil.Workflow, error) {
 
 	const (
-		workflowKind       = "Workflow"
+		workflowKind       = "PipelineRun"
 		workflowApiVersion = "tekton.dev/v1beta1"
 	)
 
@@ -165,6 +166,8 @@ func (s *ScheduledWorkflow) NewWorkflow(
 	}
 	workflow.Kind = workflowKind
 	workflow.APIVersion = workflowApiVersion
+	workflow.Annotations = s.Spec.Workflow.Annotations
+	workflow.Labels = s.Spec.Workflow.Labels
 	result := commonutil.NewWorkflow(workflow)
 
 	uuid, err := s.uuid.NewRandom()
@@ -183,7 +186,12 @@ func (s *ScheduledWorkflow) NewWorkflow(
 	result.OverrideParameters(formattedParams)
 
 	result.SetCannonicalLabels(s.Name, nextScheduledEpoch, s.nextIndex())
-	result.SetLabels(commonutil.LabelKeyWorkflowRunId, uuid.String())
+	result.SetLabels(commonutil.LabelOriginalPipelineRunName, workflowName)
+	err = result.ReplaceOrignalPipelineRunName(workflow.Name)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to replace workflow original pipelineRun name")
+	}
+
 	// Pod pipeline/runid label is used by v2 compatible mode.
 	result.SetLabels(commonutil.LabelKeyWorkflowRunId, uuid.String())
 	// Replace {{workflow.uid}} with runId
