@@ -41,7 +41,7 @@
     "react-vis": "^1.11.2",
     "request": "^2.88.2",
     "runtypes": "^6.3.0",
-    "ts-proto": "^1.95.0",
+    "ts-proto": "^1.156.7",
     "typestyle": "^2.0.4"
   },
   "scripts": {
