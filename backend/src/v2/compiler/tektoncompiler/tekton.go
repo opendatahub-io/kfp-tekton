@@ -113,7 +113,7 @@ func Compile(jobArg *pipelinespec.PipelineJob, kubernetesSpecArg *pipelinespec.S
 	c := &pipelinerunCompiler{
 		pr: pr,
 		// TODO(chensun): release process and update the images.
-		launcherImage: "quay.io/opendatahub/kfp-launcher:v2",
+		launcherImage: GetLauncherImage(),
 		job:           job,
 		spec:          spec,
 		dagStack:      make([]string, 0, 10),

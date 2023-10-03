@@ -37,6 +37,7 @@ const (
 	MetadataGPRCServicePort = "8080"
 	MLPipelineServiceHost   = "ml-pipeline.kubeflow.svc.cluster.local"
 	MLPipelineServicePort   = "8887"
+	LauncherImage           = "quay.io/opendatahub/kfp-launcher:v2"
 )
 
 var (
@@ -45,6 +46,7 @@ var (
 	metadataGRPCServicePort = MetadataGPRCServicePort
 	mlPipelineServiceHost   = MLPipelineServiceHost
 	mlPipelineServicePort   = MLPipelineServicePort
+	launcherImage           = LauncherImage
 )
 
 func initEnvVars() {
@@ -67,6 +69,11 @@ func initEnvVars() {
 	metadataGRPCServicePort = os.Getenv("METADATA_GRPC_SERVICE_SERVICE_PORT")
 	if metadataGRPCServicePort == "" {
 		metadataGRPCServicePort = MetadataGPRCServicePort
+	}
+
+	launcherImage = os.Getenv("V2_LAUNCHER_IMAGE")
+	if launcherImage == "" {
+		launcherImage = LauncherImage
 	}
 	envVarInit = true
 }
@@ -97,6 +104,13 @@ func GetMLPipelinePort() string {
 		initEnvVars()
 	}
 	return mlPipelineServicePort
+}
+
+func GetLauncherImage() string {
+	if !envVarInit {
+		initEnvVars()
+	}
+	return launcherImage
 }
 
 // add KubernetesSpec for the container of the component
