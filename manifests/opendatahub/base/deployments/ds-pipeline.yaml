@@ -23,6 +23,8 @@ spec:
             - secretRef:
                 name: $(artifact_secret_name)
           env:
+            - name: V2_LAUNCHER_IMAGE
+              value: "quay.io/opendatahub/kfp-launcher:v2"
             - name: AUTO_UPDATE_PIPELINE_DEFAULT_VERSION
               valueFrom:
                 configMapKeyRef:
