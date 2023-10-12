@@ -83,6 +83,13 @@ vars:
       apiVersion: v1
     fieldref:
       fieldpath: data.ds_pipelines_ui_configuration
+  - name: LOG_LEVEL
+      objref:
+        name: ds-pipeline-params-config
+        kind: ConfigMap
+        apiVersion: v1
+      fieldref:
+        fieldpath: data.LOG_LEVEL
 
 configurations:
   - params.yaml

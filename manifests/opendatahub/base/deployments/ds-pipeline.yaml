@@ -150,6 +150,8 @@ spec:
                 secretKeyRef:
                   key: port
                   name: $(artifact_secret_name)
+            - name: LOG_LEVEL
+              value: $(LOG_LEVEL)
 
           image: api-server
           imagePullPolicy: Always

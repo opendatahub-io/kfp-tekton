@@ -51,4 +51,4 @@ ENV NUM_WORKERS 2
 #CHILDREFERENCESKIND kind of runs to search for the childReferences
 ENV CHILDREFERENCES_KINDS ""
 
-CMD persistence_agent --logtostderr=true --namespace=${NAMESPACE} --ttlSecondsAfterWorkflowFinish=${TTL_SECONDS_AFTER_WORKFLOW_FINISH} --numWorker ${NUM_WORKERS} --childReferencesKinds ${CHILDREFERENCES_KINDS}
+CMD persistence_agent --logtostderr=true --namespace=${NAMESPACE} --ttlSecondsAfterWorkflowFinish=${TTL_SECONDS_AFTER_WORKFLOW_FINISH} --numWorker ${NUM_WORKERS} --childReferencesKinds ${CHILDREFERENCES_KINDS} --log-level=info

@@ -42,4 +42,4 @@ RUN apk --no-cache add tzdata
 
 ENV NAMESPACE ""
 
-CMD /bin/controller --logtostderr=true --namespace=${NAMESPACE}
+CMD /bin/controller --logtostderr=true --namespace=${NAMESPACE} --log-level=info

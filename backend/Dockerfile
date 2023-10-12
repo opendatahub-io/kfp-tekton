@@ -89,4 +89,4 @@ RUN apt-get update && apt-get install -y ca-certificates wget
 EXPOSE 8888
 
 # Start the apiserver
-CMD /bin/apiserver --config=/config --sampleconfig=/config/sample_config.json -logtostderr=true
+CMD /bin/apiserver --config=/config --sampleconfig=/config/sample_config.json -logtostderr=true --log-level=info

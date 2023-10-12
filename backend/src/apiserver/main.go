@@ -29,6 +29,7 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/fsnotify/fsnotify"
 	"github.com/golang/glog"
 	"github.com/gorilla/mux"
@@ -69,6 +70,17 @@ func main() {
 	if err != nil {
 		glog.Fatalf("Failed to create default experiment. Err: %v", err)
 	}
+
+    logLevel := os.Getenv("LOG_LEVEL")
+    if logLevel == "" {
+        logLevel = "info"
+    }
+
+    level, err := log.ParseLevel(logLevel)
+    if err != nil {
+        log.Fatal("Invalid log level:", err)
+    }
+    log.SetLevel(level)
 
 	go startRpcServer(resourceManager)
 	startHttpProxy(resourceManager)

@@ -20,6 +20,8 @@ spec:
     spec:
       containers:
         - env:
+            - name: LOG_LEVEL
+              value: $(LOG_LEVEL)
             - name: NAMESPACE
               valueFrom:
                 fieldRef:
@@ -30,6 +32,7 @@ spec:
           command:
             - persistence_agent
             - "--logtostderr=true"
+            - "--log-level=$(LOG_LEVEL)"
             - "--ttlSecondsAfterWorkflowFinish=86400"
             - "--numWorker=2"
             - "--mlPipelineAPIServerName=ds-pipeline"

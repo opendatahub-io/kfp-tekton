@@ -18,6 +18,7 @@ import (
 	"flag"
 	"time"
 
+	"os"
 	"github.com/kubeflow/pipelines/backend/src/agent/persistence/client"
 	"github.com/kubeflow/pipelines/backend/src/common/util"
 	swfclientset "github.com/kubeflow/pipelines/backend/src/crd/pkg/client/clientset/versioned"
@@ -85,6 +86,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error building workflow clientset: %s", err.Error())
 	}
+
+	logLevel := os.Getenv("LOG_LEVEL")
+    if logLevel == "" {
+        logLevel = "info"
+    }
+
+    level, err := log.ParseLevel(logLevel)
+    if err != nil {
+        log.Fatal("Invalid log level:", err)
+    }
+    log.SetLevel(level)
 
 	var swfInformerFactory swfinformers.SharedInformerFactory
 	var workflowInformerFactory workflowinformers.SharedInformerFactory

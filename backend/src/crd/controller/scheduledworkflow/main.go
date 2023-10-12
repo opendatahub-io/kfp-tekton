@@ -19,6 +19,7 @@ import (
 	"strings"
 	"time"
 
+	"os"
 	commonutil "github.com/kubeflow/pipelines/backend/src/common/util"
 	"github.com/kubeflow/pipelines/backend/src/crd/controller/scheduledworkflow/util"
 	swfclientset "github.com/kubeflow/pipelines/backend/src/crd/pkg/client/clientset/versioned"
@@ -62,6 +63,17 @@ func main() {
 	}
 	cfg.QPS = float32(clientQPS)
 	cfg.Burst = clientBurst
+
+	logLevel := os.Getenv("LOG_LEVEL")
+    if logLevel == "" {
+        logLevel = "info"
+    }
+
+    level, err := log.ParseLevel(logLevel)
+    if err != nil {
+        log.Fatal("Invalid log level:", err)
+    }
+    log.SetLevel(level)
 
 	kubeClient, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
