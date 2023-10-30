@@ -1,0 +1,190 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # CustomResourceDefinitions
+  - ./customresourcedefinitions/scheduledworkflows.yaml
+  - ./customresourcedefinitions/exithandlers.yaml
+  - ./customresourcedefinitions/pipelineloops.yaml
+  - ./customresourcedefinitions/breaktasks.yaml
+  - ./customresourcedefinitions/kfptasks.yaml
+
+  # Deployments
+  - ./deployments/ds-pipeline-persistenceagent.yaml
+  - ./deployments/ds-pipeline-scheduledworkflow.yaml
+  - ./deployments/ds-pipeline.yaml
+  - ./deployments/ds-pipeline-tekton-driver-controller.yaml
+  - ./deployments/ds-pipeline-exithandler-controller.yaml
+  - ./deployments/ds-pipeline-exithandler-webhook.yaml
+  - ./deployments/ds-pipeline-pipelineloop-controller.yaml
+  - ./deployments/ds-pipeline-pipelineloop-webhook.yaml
+  - ./deployments/ds-pipeline-kfptask-controller.yaml
+  - ./deployments/ds-pipeline-kfptask-webhook.yaml
+  - ./deployments/ds-pipeline-metadata-envoy.yaml
+  - ./deployments/ds-pipeline-metadata-grpc.yaml
+  - ./deployments/ds-pipeline-metadata-writer.yaml
+  - ./deployments/ds-pipeline-cache-deployer.yaml
+  - ./deployments/ds-pipeline-cache.yaml
+
+  # Rolebindings
+  - ./rolebindings/ds-pipeline-scheduledworkflow-binding.yaml
+  - ./rolebindings/ds-pipeline.yaml
+  - ./rolebindings/pipeline-runner-binding.yaml
+  - ./rolebindings/ds-pipeline-tekton-driver-rolebinding.yaml
+  - ./rolebindings/kfp-exithandler-rolebinding.yaml
+  - ./rolebindings/tekton-pipelineloop-rolebinding.yaml
+  - ./rolebindings/kfptask-controller-rolebinding.yaml
+  - ./rolebindings/kubeflow-pipelines-metadata-writer-binding.yaml
+  - ./rolebindings/ds-pipeline-cache-deployer.yaml
+  - ./rolebindings/ds-pipeline-cache.yaml
+
+  # Roles
+  - ./roles/ds-pipeline-scheduledworkflow.yaml
+  - ./roles/ds-pipeline.yaml
+  - ./roles/pipeline-runner.yaml
+  - ./roles/ds-pipeline-tekton-driver.yaml
+  - ./roles/ds-pipeline-exithandler.yaml
+  - ./roles/ds-pipeline-pipelineloop.yaml
+  - ./roles/ds-pipeline-kfptask.yaml
+  - ./roles/ds-pipeline-metadata-writer.yaml
+  - ./roles/ds-pipeline-cache-deployer.yaml
+  - ./roles/ds-pipeline-cache.yaml
+
+  # ClusterRoleBindings
+  - ./clusterrolebindings/ds-pipeline-persistenceagent.yaml
+  - ./clusterrolebindings/ds-pipeline-tekton-driver.yaml
+  - ./clusterrolebindings/ds-pipeline-exithandler-webhook.yaml
+  - ./clusterrolebindings/ds-pipeline-pipelineloop.yaml
+  - ./clusterrolebindings/ds-pipeline-kfptask.yaml
+  - ./clusterrolebindings/ds-pipeline-cache-deployer.yaml
+
+  # ClusterRoles
+  - ./clusterroles/ds-pipeline-persistenceagent.yaml
+  - ./clusterroles/ds-pipeline-tekton-driver.yaml
+  - ./clusterroles/ds-pipeline-exithandler-controller.yaml
+  - ./clusterroles/ds-pipeline-pipelineloop.yaml
+  - ./clusterroles/ds-pipeline-kfptask.yaml
+  - ./clusterroles/ds-pipeline-cache-deployer.yaml
+
+  # ServiceAccounts
+  - ./serviceaccounts/ds-pipeline-container-builder.yaml
+  - ./serviceaccounts/ds-pipeline-persistenceagent.yaml
+  - ./serviceaccounts/ds-pipeline-scheduledworkflow.yaml
+  - ./serviceaccounts/ds-pipeline.yaml
+  - ./serviceaccounts/pipeline-runner.yaml
+  - ./serviceaccounts/ds-pipeline-tekton-driver.yaml
+  - ./serviceaccounts/ds-pipeline-exithandler.yaml
+  - ./serviceaccounts/ds-pipeline-pipelineloop.yaml
+  - ./serviceaccounts/ds-pipeline-kfptask.yaml
+  - ./serviceaccounts/ds-pipeline-metadata-writer.yaml
+  - ./serviceaccounts/ds-pipeline-metadata-grpc-server.yaml
+  - ./serviceaccounts/ds-pipeline-cache-deployer.yaml
+  - ./serviceaccounts/ds-pipeline-cache.yaml
+
+  # ConfigMaps
+  - ./configmaps/object-store-config.yaml
+  - ./configmaps/cache-config.yaml
+
+  # Secrets
+  - ./secrets/kfp-exithandler-webhook-configuration.yaml
+  - ./secrets/tekton-pipelineloop-webhook-configuration.yaml
+  - ./secrets/kfptask-webhook-configuration.yaml
+
+  # Services
+  - ./services/ds-pipeline.yaml
+  - ./services/ds-pipeline-tekton-driver.yaml
+  - ./services/ds-pipeline-metadata-envoy.yaml
+  - ./services/ds-pipeline-metadata-grpc.yaml
+  - ./services/ds-pipeline-cache.yaml
+
+  # Monitoring
+  - ../prometheus
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: ds-pipeline-params-config
+    envs:
+      - params.env
+vars:
+  - name: artifact_secret_name
+    objref:
+      name: ds-pipeline-params-config
+      kind: ConfigMap
+      apiVersion: v1
+    fieldref:
+      fieldpath: data.artifact_secret_name
+  - name: pipeline_install_configuration
+    objref:
+      name: ds-pipeline-params-config
+      kind: ConfigMap
+      apiVersion: v1
+    fieldref:
+      fieldpath: data.pipeline_install_configuration
+  - name: ds_pipelines_configuration
+    objref:
+      name: ds-pipeline-params-config
+      kind: ConfigMap
+      apiVersion: v1
+    fieldref:
+      fieldpath: data.ds_pipelines_configuration
+  - name: database_secret
+    objref:
+      name: ds-pipeline-params-config
+      kind: ConfigMap
+      apiVersion: v1
+    fieldref:
+      fieldpath: data.database_secret
+  - name: ds_pipelines_ui_configuration
+    objref:
+      name: ds-pipeline-params-config
+      kind: ConfigMap
+      apiVersion: v1
+    fieldref:
+      fieldpath: data.ds_pipelines_ui_configuration
+
+configurations:
+  - params.yaml
+
+images:
+  - name: persistenceagent
+    newName: quay.io/opendatahub/ds-pipelines-persistenceagent
+    newTag: 2.0.0
+  - name: scheduledworkflow
+    newName: quay.io/opendatahub/ds-pipelines-scheduledworkflow
+    newTag: 2.0.0
+  - name: api-server
+    newName: quay.io/opendatahub/ds-pipelines-api-server
+    newTag: 2.0.0
+  - name: kfp-driver
+    newName: quay.io/opendatahub/ds-pipelines-tekton-driver
+    newTag: 2.0.0
+  - name: tekton-exithandler-controller
+    newName: quay.io/opendatahub/ds-pipelines-tekton-exithandler-controller
+    newTag: 2.0.0
+  - name: tekton-exithandler-webhook
+    newName: quay.io/opendatahub/ds-pipelines-tekton-exithandler-webhook
+    newTag: 2.0.0
+  - name: tekton-pipelineloop-controller
+    newName: quay.io/opendatahub/ds-pipelines-tekton-pipelineloop-controller
+    newTag: 2.0.0
+  - name: tekton-pipelineloop-webhook
+    newName: quay.io/opendatahub/ds-pipelines-tekton-pipelineloop-webhook
+    newTag: 2.0.0
+  - name: kfptask-controller
+    newName: quay.io/opendatahub/ds-pipelines-tekton-kfptask-controller
+    newTag: 2.0.0
+  - name: kfptask-webhook
+    newName: quay.io/opendatahub/ds-pipelines-tekton-kfptask-webhook
+    newTag: 2.0.0
+  - name: metadata-envoy
+    newName: quay.io/opendatahub/ds-pipelines-metadata-envoy
+    newTag: 2.0.0
+  - name: metadata-grpc
+    newName: quay.io/opendatahub/ds-pipelines-metadata-grpc
+    newTag: 2.0.0
+  - name: metadata-writer
+    newName: quay.io/opendatahub/ds-pipelines-metadata-writer
+    newTag: 2.0.0

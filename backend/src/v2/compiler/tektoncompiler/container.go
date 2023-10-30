@@ -74,7 +74,7 @@ func initEnvVars() {
 	if metadataGRPCServicePort == "" {
 		metadataGRPCServicePort = MetadataGPRCServicePort
 	}
-	launcherImage = os.Getenv("V2_LAUNCHER_IMAGE")
+  launcherImage = os.Getenv("V2_LAUNCHER_IMAGE")
 	if launcherImage == "" {
 		launcherImage = LauncherImage
 	}
