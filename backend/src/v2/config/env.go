@@ -29,9 +29,17 @@ import (
 )
 
 const (
-	configMapName                = "kfp-launcher"
-	defaultPipelineRoot          = "minio://mlpipeline/v2/artifacts"
-	configKeyDefaultPipelineRoot = "defaultPipelineRoot"
+	configMapName                  = "kfp-launcher"
+	defaultPipelineRoot            = "minio://mlpipeline/v2/artifacts"
+	configKeyDefaultPipelineRoot   = "defaultPipelineRoot"
+	minioAuthConfig                = "mlpipeline-minio-artifact"
+	configKeyMinioAuthConfig       = "minioAuthConfig"
+	minioAuthConfigAccessKey       = "accesskey"
+	configMinioAuthConfigAccessKey = "minioAuthConfigAccessKey"
+	minioAuthConfigSecretKey       = "secretkey"
+	configMinioAuthConfigSecretKey = "minioAuthConfigSecretKey"
+	defaultMinioEndpoint           = "minio-service.kubeflow:9000"
+	configDefaultMinioEndpoint     = "defaultMinioEndpoint"
 )
 
 // Config is the KFP runtime configuration.
@@ -60,6 +68,22 @@ func (c *Config) DefaultPipelineRoot() string {
 		return defaultPipelineRoot
 	}
 	return c.data[configKeyDefaultPipelineRoot]
+}
+
+// Config.MinioAuthConfig gets the configured default minio auth config with creds
+func (c *Config) MinioAuthConfig() (string, string, string) {
+	if c == nil || c.data[configKeyMinioAuthConfig] == "" {
+		return minioAuthConfig, minioAuthConfigAccessKey, minioAuthConfigSecretKey
+	}
+	return c.data[configKeyMinioAuthConfig], c.data[configMinioAuthConfigAccessKey], c.data[configMinioAuthConfigSecretKey]
+}
+
+// Config.MinioAuthConfig gets the configured default minio endpoint
+func (c *Config) MinioEndpoint() string {
+	if c == nil || c.data[configDefaultMinioEndpoint] == "" {
+		return defaultMinioEndpoint
+	}
+	return c.data[configDefaultMinioEndpoint]
 }
 
 // InPodNamespace gets current namespace from inside a Kubernetes Pod.

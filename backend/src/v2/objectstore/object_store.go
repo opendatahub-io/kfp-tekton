@@ -30,10 +30,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/golang/glog"
+	"github.com/kubeflow/pipelines/backend/src/v2/config"
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/gcsblob"
 	"gocloud.dev/blob/s3blob"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -44,21 +44,27 @@ type Config struct {
 	QueryString string
 }
 
-func OpenBucket(ctx context.Context, k8sClient kubernetes.Interface, namespace string, config *Config) (bucket *blob.Bucket, err error) {
+func OpenBucket(ctx context.Context, k8sClient kubernetes.Interface, namespace string, bucketConfig *Config) (bucket *blob.Bucket, err error) {
 	defer func() {
 		if err != nil {
-			err = fmt.Errorf("Failed to open bucket %q: %w", config.BucketName, err)
+			err = fmt.Errorf("Failed to open bucket %q: %w", bucketConfig.BucketName, err)
 		}
 	}()
-	if config.Scheme == "minio://" {
-		cred, err := getMinioCredential(ctx, k8sClient, namespace)
+	if bucketConfig.Scheme == "minio://" {
+		cfg, err := config.FromConfigMap(ctx, k8sClient, namespace)
+		if err != nil {
+			return nil, err
+		}
+		_, minioAuthConfigAccessKey, minioAuthConfigSecretKey := cfg.MinioAuthConfig()
+		defaultMinioEndpointInMultiUserMode := cfg.MinioEndpoint()
+		cred, err := getMinioCredential(ctx, k8sClient, namespace, minioAuthConfigAccessKey, minioAuthConfigSecretKey)
 		if err != nil {
 			return nil, fmt.Errorf("Failed to get minio credential: %w", err)
 		}
 		sess, err := session.NewSession(&aws.Config{
 			Credentials:      cred,
 			Region:           aws.String("minio"),
-			Endpoint:         aws.String(MinioDefaultEndpoint()),
+			Endpoint:         aws.String(MinioDefaultEndpoint(defaultMinioEndpointInMultiUserMode)),
 			DisableSSL:       aws.Bool(true),
 			S3ForcePathStyle: aws.Bool(true),
 		})
@@ -66,16 +72,16 @@ func OpenBucket(ctx context.Context, k8sClient kubernetes.Interface, namespace s
 		if err != nil {
 			return nil, fmt.Errorf("Failed to create session to access minio: %v", err)
 		}
-		minioBucket, err := s3blob.OpenBucket(ctx, sess, config.BucketName, nil)
+		minioBucket, err := s3blob.OpenBucket(ctx, sess, bucketConfig.BucketName, nil)
 		if err != nil {
 			return nil, err
 		}
 		// Directly calling s3blob.OpenBucket does not allow overriding prefix via bucketConfig.BucketURL().
 		// Therefore, we need to explicitly configure the prefixed bucket.
-		return blob.PrefixedBucket(minioBucket, config.Prefix), nil
+		return blob.PrefixedBucket(minioBucket, bucketConfig.Prefix), nil
 
 	}
-	return blob.OpenBucket(ctx, config.bucketURL())
+	return blob.OpenBucket(ctx, bucketConfig.bucketURL())
 }
 
 func (b *Config) bucketURL() string {
@@ -288,10 +294,8 @@ func downloadFile(ctx context.Context, bucket *blob.Bucket, blobFilePath, localF
 
 // The endpoint uses Kubernetes service DNS name with namespace:
 // https://kubernetes.io/docs/concepts/services-networking/service/#dns
-const defaultMinioEndpointInMultiUserMode = "minio-service.kubeflow:9000"
-const minioArtifactSecretName = "mlpipeline-minio-artifact"
 
-func MinioDefaultEndpoint() string {
+func MinioDefaultEndpoint(defaultMinioEndpointInMultiUserMode string) string {
 	// Discover minio-service in the same namespace by env var.
 	// https://kubernetes.io/docs/concepts/services-networking/service/#environment-variables
 	minioHost := os.Getenv("MINIO_SERVICE_SERVICE_HOST")
@@ -307,22 +311,16 @@ func MinioDefaultEndpoint() string {
 	return defaultMinioEndpointInMultiUserMode
 }
 
-func getMinioCredential(ctx context.Context, clientSet kubernetes.Interface, namespace string) (cred *credentials.Credentials, err error) {
+func getMinioCredential(ctx context.Context, clientSet kubernetes.Interface, namespace string, minioAuthConfigAccessKey string, minioAuthConfigSecretKey string) (cred *credentials.Credentials, err error) {
 	defer func() {
 		if err != nil {
 			// wrap error before returning
-			err = fmt.Errorf("Failed to get MinIO credential from secret name=%q namespace=%q: %w", minioArtifactSecretName, namespace, err)
+			err = fmt.Errorf("Failed to get MinIO credential from config in the namespace=%q: %w", namespace, err)
 		}
 	}()
-	secret, err := clientSet.CoreV1().Secrets(namespace).Get(
-		ctx,
-		minioArtifactSecretName,
-		metav1.GetOptions{})
-	if err != nil {
-		return nil, err
-	}
-	accessKey := string(secret.Data["accesskey"])
-	secretKey := string(secret.Data["secretkey"])
+
+	accessKey := minioAuthConfigAccessKey
+	secretKey := minioAuthConfigSecretKey
 
 	if accessKey != "" && secretKey != "" {
 		cred = credentials.NewStaticCredentials(accessKey, secretKey, "")

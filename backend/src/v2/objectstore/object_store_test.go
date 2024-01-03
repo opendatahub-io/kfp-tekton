@@ -185,22 +185,25 @@ func Test_GetMinioDefaultEndpoint(t *testing.T) {
 		os.Unsetenv("MINIO_SERVICE_SERVICE_PORT")
 	}()
 	tests := []struct {
-		name                string
-		minioServiceHostEnv string
-		minioServicePortEnv string
-		want                string
+		name                 string
+		minioServiceHostEnv  string
+		minioServicePortEnv  string
+		defaultMinioEndpoint string
+		want                 string
 	}{
 		{
-			name:                "In full Kubeflow, KFP multi-user mode on",
-			minioServiceHostEnv: "",
-			minioServicePortEnv: "",
-			want:                "minio-service.kubeflow:9000",
+			name:                 "In full Kubeflow, KFP multi-user mode on",
+			minioServiceHostEnv:  "",
+			minioServicePortEnv:  "",
+			defaultMinioEndpoint: "minio-service.kubeflow:9000",
+			want:                 "minio-service.kubeflow:9000",
 		},
 		{
-			name:                "In KFP standalone without multi-user mode",
-			minioServiceHostEnv: "1.2.3.4",
-			minioServicePortEnv: "4321",
-			want:                "1.2.3.4:4321",
+			name:                 "In KFP standalone without multi-user mode",
+			minioServiceHostEnv:  "1.2.3.4",
+			minioServicePortEnv:  "4321",
+			defaultMinioEndpoint: "minio-service.kubeflow:9000",
+			want:                 "1.2.3.4:4321",
 		},
 	}
 	for _, tt := range tests {
@@ -215,10 +218,10 @@ func Test_GetMinioDefaultEndpoint(t *testing.T) {
 			} else {
 				os.Unsetenv("MINIO_SERVICE_SERVICE_PORT")
 			}
-			got := objectstore.MinioDefaultEndpoint()
+			got := objectstore.MinioDefaultEndpoint(tt.defaultMinioEndpoint)
 			if got != tt.want {
 				t.Errorf(
-					"MinioDefaultEndpoint() = %q, want %q\nwhen MINIO_SERVICE_SERVICE_HOST=%q MINIO_SERVICE_SERVICE_PORT=%q",
+					"MinioDefaultEndpoint(tt.defaultMinioEndpoint) = %q, want %q\nwhen MINIO_SERVICE_SERVICE_HOST=%q MINIO_SERVICE_SERVICE_PORT=%q",
 					got, tt.want, tt.minioServiceHostEnv, tt.minioServicePortEnv,
 				)
 			}
