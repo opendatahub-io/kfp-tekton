@@ -1,4 +1,0 @@
-[download : main] "hello world"
-
-[echo : main] pipelineParams: hello world
-

@@ -1,3 +1,0 @@
-kfp-tekton
-scikit-learn
-pandas
