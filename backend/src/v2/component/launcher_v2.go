@@ -32,6 +32,7 @@ import (
 	"github.com/golang/protobuf/ptypes/timestamp"
 	api "github.com/kubeflow/pipelines/backend/api/v1beta1/go_client"
 	"github.com/kubeflow/pipelines/backend/src/v2/cacheutils"
+	"github.com/kubeflow/pipelines/backend/src/v2/config"
 
 	"github.com/kubeflow/pipelines/api/v2alpha1/go/pipelinespec"
 	"github.com/kubeflow/pipelines/backend/src/v2/metadata"
@@ -160,7 +161,13 @@ func (l *LauncherV2) Execute(ctx context.Context) (err error) {
 	if err != nil {
 		return err
 	}
-	bucket, err := objectstore.OpenBucket(ctx, l.k8sClient, l.options.Namespace, bucketConfig)
+	cfg, err := config.FromConfigMap(ctx, l.k8sClient, l.options.Namespace)
+	if err != nil {
+		return err
+	}
+	defaultMinioAuthSecretName, defaultMinioSecretAccessKeyKey, defaultMinioSecretSecretKeyKey := cfg.MinioAuthConfig()
+	defaultMinioEndpoint := cfg.MinioEndpoint()
+	bucket, err := objectstore.OpenBucket(ctx, l.k8sClient, l.options.Namespace, bucketConfig, defaultMinioAuthSecretName, defaultMinioSecretAccessKeyKey, defaultMinioSecretSecretKeyKey, defaultMinioEndpoint)
 	if err != nil {
 		return err
 	}
@@ -539,7 +546,13 @@ func fetchNonDefaultBuckets(
 			if err != nil {
 				return nonDefaultBuckets, fmt.Errorf("failed to parse bucketConfig for output artifact %q with uri %q: %w", name, artifact.GetUri(), err)
 			}
-			nonDefaultBucket, err := objectstore.OpenBucket(ctx, k8sClient, namespace, nonDefaultBucketConfig)
+			cfg, err := config.FromConfigMap(ctx, k8sClient, namespace)
+			if err != nil {
+				return nil, err
+			}
+			defaultMinioAuthSecretName, defaultMinioSecretAccessKeyKey, defaultMinioSecretSecretKeyKey := cfg.MinioAuthConfig()
+			defaultMinioEndpoint := cfg.MinioEndpoint()
+			nonDefaultBucket, err := objectstore.OpenBucket(ctx, k8sClient, namespace, nonDefaultBucketConfig, defaultMinioAuthSecretName, defaultMinioSecretAccessKeyKey, defaultMinioSecretSecretKeyKey, defaultMinioEndpoint)
 			if err != nil {
 				return nonDefaultBuckets, fmt.Errorf("failed to open bucket for output artifact %q with uri %q: %w", name, artifact.GetUri(), err)
 			}
