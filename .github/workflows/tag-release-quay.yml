@@ -26,7 +26,7 @@ env:
 jobs:
   copy-tag-to-quay:
     runs-on: ubuntu-latest
-    if: github.repository == 'opendatahub-io/data-science-pipelines'
+    if: github.repository == 'opendatahub-io/data-science-pipelines-tekton'
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
