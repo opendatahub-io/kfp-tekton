@@ -146,14 +146,10 @@ replace (
 	github.com/cloudevents/sdk-go/v2 v2.12.0 => github.com/cloudevents/sdk-go/v2 v2.15.1
 	github.com/go-git/go-git/v5 v5.4.2 => github.com/go-git/go-git/v5 v5.11.0
 	github.com/mattn/go-sqlite3 => github.com/mattn/go-sqlite3 v1.9.0
-	github.com/mattn/go-sqlite3 v1.9.0 => github.com/mattn/go-sqlite3 v1.14.18
 	github.com/prometheus/common => github.com/prometheus/common v0.26.0
 	go.mongodb.org/mongo-driver => go.mongodb.org/mongo-driver v1.4.4
 	go.opencensus.io => go.opencensus.io v0.22.5
-	golang.org/x/net v0.17.0 => golang.org/x/net v0.23.0
-	golang.org/x/net v0.21.0 => golang.org/x/net v0.23.0
 	gopkg.in/yaml.v3 => gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b => gopkg.in/yaml.v3 v3.0.1
 )
 
 go 1.21
