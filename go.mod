@@ -143,7 +143,6 @@ require (
 )
 
 replace (
-	github.com/cloudevents/sdk-go/v2 v2.12.0 => github.com/cloudevents/sdk-go/v2 v2.15.1
 	github.com/go-git/go-git/v5 v5.4.2 => github.com/go-git/go-git/v5 v5.11.0
 	github.com/mattn/go-sqlite3 => github.com/mattn/go-sqlite3 v1.9.0
 	github.com/prometheus/common => github.com/prometheus/common v0.26.0
